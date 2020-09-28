@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Hello OpenCV.js</title>
+</head>
+<body>
+<h2>Hello OpenCV.js</h2>
+<p id="status">OpenCV.js is loading...</p>
+<div>
+  <div class="inputoutput">
+    <img id="imageSrc" alt="No Image" />
+    <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput" ></canvas>
+    <div class="caption">canvasOutput</div>
+  </div>
+</div>
+<script type="text/javascript">
+let imgElement = document.getElementById('imageSrc');
+let inputElement = document.getElementById('fileInput');
+inputElement.addEventListener('change', (e) => {
+  imgElement.src = URL.createObjectURL(e.target.files[0]);
+}, false);
+imgElement.onload = function() {
+  let mat = cv.imread(imgElement);
+  let dst=new cv.Mat();
+  let dst1=new cv.Mat();
+  let dst2=new cv.Mat();
+ 
+ // mat.copyTo(dst);
+  cv.cvtColor(mat, dst, cv.COLOR_RGBA2GRAY, 0);
+  cv.medianBlur(dst, dst, 5);
+  cv.adaptiveThreshold(dst, dst, 200, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 3, 2);
+  cv.cvtColor(mat,dst1, cv.COLOR_RGBA2RGB);
+  cv.bilateralFilter(dst1, dst2, 9, 75, 75, cv.BORDER_DEFAULT);
+  let dst3 = new cv.Mat();
+        //cv.bitwise_not(dst,dst);
+  cv.bitwise_and(dst2,dst2, dst3,dst);
+  cv.imshow('canvasOutput', dst3);
+  dst.delete();
+  mat.delete();
+};
+function onOpenCvReady() {
+  document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+}
+</script>
+<script async src="opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+</body>
+</html>
